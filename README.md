@@ -2,6 +2,8 @@
 
 Django va Django REST Framework asosida yaratilgan zamonaviy kitoblar API xizmati. Ushbu loyihada kitoblar ro'yxati, PDF fayllar, muqova rasmlari, avtomatik `slug`, OpenAPI 3 / Swagger interaktiv hujjatlari, Jazzmin zamonaviy boshqaruv paneli va Railway serveriga deploy qilish sozlamalari mavjud.
 
+> 📖 **Frontend dasturchilar uchun to'liq qo'llanma:** [FRONTEND_DOCS.md](FRONTEND_DOCS.md)
+
 ---
 
 ## 🚀 Imkoniyatlar
@@ -15,6 +17,7 @@ Django va Django REST Framework asosida yaratilgan zamonaviy kitoblar API xizmat
   - Kitob muqovasi rasmi (`image`)
   - Kitob elektron PDF fayli (`pdf`)
 - **Dokumentatsiya:**
+  - **Frontendchilar uchun yo'riqnoma:** [FRONTEND_DOCS.md](FRONTEND_DOCS.md)
   - **Swagger UI:** `/api/docs/` yoki `/api/swagger/`
   - **Redoc:** `/api/redoc/`
   - **OpenAPI 3.0 Sxemasi:** `/api/schema/`
