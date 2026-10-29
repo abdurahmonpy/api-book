@@ -73,10 +73,26 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'config.wsgi.application'
 
-# Database: Railway PostgreSQL bo'lsa DATABASE_URL dan oladi, bo'lmasa SQLite
+# Railway Volume sozlamalari
+# Masalan, Railway Volume o'rnatilgan yo'l: /data yoki /app/media
+VOLUME_PATH = os.getenv('RAILWAY_VOLUME_MOUNT_PATH') or os.getenv('VOLUME_PATH')
+
+if VOLUME_PATH:
+    volume_dir = Path(VOLUME_PATH)
+    volume_dir.mkdir(parents=True, exist_ok=True)
+    MEDIA_ROOT = volume_dir / 'media'
+    default_db_url = f"sqlite:///{volume_dir / 'db.sqlite3'}"
+else:
+    MEDIA_ROOT = Path(os.getenv('MEDIA_ROOT', BASE_DIR / 'media'))
+    default_db_url = f"sqlite:///{BASE_DIR / 'db.sqlite3'}"
+
+MEDIA_ROOT.mkdir(parents=True, exist_ok=True)
+
+# Database: Agar DATABASE_URL (masalan PostgreSQL) bo'lsa uni ishlatadi,
+# bo'lmasa volume yoki lokal sqlite3 faylini ishlatadi.
 DATABASES = {
     'default': dj_database_url.config(
-        default=f"sqlite:///{BASE_DIR / 'db.sqlite3'}",
+        default=default_db_url,
         conn_max_age=600,
         conn_health_checks=True,
     )
@@ -120,7 +136,6 @@ WHITENOISE_MANIFEST_STRICT = False
 
 # Media files (PDFs, Images)
 MEDIA_URL = '/media/'
-MEDIA_ROOT = BASE_DIR / 'media'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
