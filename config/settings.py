@@ -15,7 +15,7 @@ SECRET_KEY = os.getenv(
     'django-insecure-$mko2&wr=o&ei0n#2hv29nr5sm)=&8!%2yw&dwya3mq8nanfqj'
 )
 
-DEBUG = os.getenv('DEBUG', 'True').lower() in ('true', '1', 'yes')
+DEBUG = os.getenv('DEBUG', 'False').lower() in ('true', '1', 'yes')
 
 ALLOWED_HOSTS = ['*']
 
@@ -113,9 +113,10 @@ STORAGES = {
         "BACKEND": "django.core.files.storage.FileSystemStorage",
     },
     "staticfiles": {
-        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+        "BACKEND": "whitenoise.storage.CompressedStaticFilesStorage",
     },
 }
+WHITENOISE_MANIFEST_STRICT = False
 
 # Media files (PDFs, Images)
 MEDIA_URL = '/media/'
