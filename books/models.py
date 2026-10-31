@@ -19,7 +19,7 @@ class Book(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.slug:
-            base_slug = slugify(self.title)
+            base_slug = slugify(self.title, allow_unicode=True)
             if not base_slug:
                 base_slug = "kitob"
             slug = base_slug

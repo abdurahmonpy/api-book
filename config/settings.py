@@ -74,7 +74,6 @@ TEMPLATES = [
 WSGI_APPLICATION = 'config.wsgi.application'
 
 # Railway Volume sozlamalari
-# Masalan, Railway Volume o'rnatilgan yo'l: /data yoki /app/media
 VOLUME_PATH = os.getenv('RAILWAY_VOLUME_MOUNT_PATH') or os.getenv('VOLUME_PATH')
 
 if VOLUME_PATH:
@@ -137,6 +136,10 @@ WHITENOISE_MANIFEST_STRICT = False
 # Media files (PDFs, Images)
 MEDIA_URL = '/media/'
 
+# Katta hajmdagi darslik va kitoblar (PDF, rasm) yuklash uchun limitlar (100 MB)
+DATA_UPLOAD_MAX_MEMORY_SIZE = 104857600
+FILE_UPLOAD_MAX_MEMORY_SIZE = 104857600
+
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # REST Framework
@@ -191,7 +194,7 @@ JAZZMIN_SETTINGS = {
     "default_icon_children": "fas fa-circle",
     "show_sidebar": True,
     "navigation_expanded": True,
-    "changeform_format": "horizontal_tabs",
+    "changeform_format": "single",
 }
 
 JAZZMIN_UI_TWEAKS = {
