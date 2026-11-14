@@ -24,3 +24,4 @@ staticfiles/
 .vscode/
 *.swp
 *.swo
+.env.*

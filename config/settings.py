@@ -73,10 +73,16 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'config.wsgi.application'
 
+# Vercel (serverless) muhitida fayl tizimi faqat o'qish uchun
+IS_VERCEL = bool(os.getenv('VERCEL'))
+
 # Railway Volume sozlamalari
 VOLUME_PATH = os.getenv('RAILWAY_VOLUME_MOUNT_PATH') or os.getenv('VOLUME_PATH')
 
-if VOLUME_PATH:
+if IS_VERCEL:
+    MEDIA_ROOT = Path('/tmp/media')
+    default_db_url = 'sqlite:////tmp/db.sqlite3'
+elif VOLUME_PATH:
     volume_dir = Path(VOLUME_PATH)
     volume_dir.mkdir(parents=True, exist_ok=True)
     MEDIA_ROOT = volume_dir / 'media'
@@ -87,15 +93,19 @@ else:
 
 MEDIA_ROOT.mkdir(parents=True, exist_ok=True)
 
-# Database: Agar DATABASE_URL (masalan PostgreSQL) bo'lsa uni ishlatadi,
+# Database: Agar DATABASE_URL (masalan Supabase PostgreSQL) bo'lsa uni ishlatadi,
 # bo'lmasa volume yoki lokal sqlite3 faylini ishlatadi.
 DATABASES = {
     'default': dj_database_url.config(
         default=default_db_url,
-        conn_max_age=600,
-        conn_health_checks=True,
+        # Serverless + Supabase pooler (transaction mode) uchun ulanishni saqlamaymiz
+        conn_max_age=0 if IS_VERCEL else 600,
+        conn_health_checks=not IS_VERCEL,
     )
 }
+if DATABASES['default'].get('ENGINE', '').endswith('postgresql'):
+    # Supabase pooler (pgbouncer, transaction mode) server-side cursor'larni qo'llamaydi
+    DATABASES['default']['DISABLE_SERVER_SIDE_CURSORS'] = True
 
 # Password validation
 AUTH_PASSWORD_VALIDATORS = [
@@ -132,6 +142,33 @@ STORAGES = {
     },
 }
 WHITENOISE_MANIFEST_STRICT = False
+if IS_VERCEL:
+    # Vercel'da collectstatic ishlamaydi - static fayllar to'g'ridan-to'g'ri topiladi
+    WHITENOISE_USE_FINDERS = True
+
+# Supabase Storage (S3-compatible) - media fayllar (PDF, rasm) uchun
+SUPABASE_S3_ACCESS_KEY = os.getenv('SUPABASE_S3_ACCESS_KEY')
+SUPABASE_S3_SECRET_KEY = os.getenv('SUPABASE_S3_SECRET_KEY')
+SUPABASE_PROJECT_REF = os.getenv('SUPABASE_PROJECT_REF')
+SUPABASE_BUCKET = os.getenv('SUPABASE_BUCKET', 'media')
+
+if SUPABASE_S3_ACCESS_KEY and SUPABASE_S3_SECRET_KEY and SUPABASE_PROJECT_REF:
+    STORAGES['default'] = {
+        'BACKEND': 'storages.backends.s3.S3Storage',
+        'OPTIONS': {
+            'access_key': SUPABASE_S3_ACCESS_KEY,
+            'secret_key': SUPABASE_S3_SECRET_KEY,
+            'bucket_name': SUPABASE_BUCKET,
+            'endpoint_url': os.getenv(
+                'SUPABASE_S3_ENDPOINT',
+                f'https://{SUPABASE_PROJECT_REF}.storage.supabase.co/storage/v1/s3',
+            ),
+            'region_name': os.getenv('SUPABASE_REGION', 'ap-northeast-2'),
+            'custom_domain': f'{SUPABASE_PROJECT_REF}.supabase.co/storage/v1/object/public/{SUPABASE_BUCKET}',
+            'querystring_auth': False,
+            'file_overwrite': False,
+        },
+    }
 
 # Media files (PDFs, Images)
 MEDIA_URL = '/media/'
@@ -167,6 +204,7 @@ CORS_ALLOW_CREDENTIALS = True
 CSRF_TRUSTED_ORIGINS = [
     'https://*.railway.app',
     'https://*.up.railway.app',
+    'https://*.vercel.app',
     'http://localhost:8000',
     'http://127.0.0.1:8000',
 ]

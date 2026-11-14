@@ -74,3 +74,19 @@ Brauzerda:
 3. `api-book` repozitoriyasini tanlang.
 4. Xohishingizga ko'ra **PostgreSQL** qo'shing (Railway avtomatik `DATABASE_URL` parametrini ulaydi).
 5. Loyiha `Procfile` va `railway.json` orqali avtomatik tarzda build qilinadi va ishga tushadi!
+
+## Vercel + Supabase deploy
+
+1. Supabase'da loyiha oching. **Storage** da `media` nomli **public** bucket yarating.
+2. Vercel > Project > Settings > Environment Variables:
+   - `DATABASE_URL` - Supabase > Connect > Transaction pooler (port 6543) URL
+   - `SUPABASE_PROJECT_REF` - loyiha ref (masalan `abcd1234`)
+   - `SUPABASE_S3_ACCESS_KEY` / `SUPABASE_S3_SECRET_KEY` - Storage > S3 Connection > New access key
+   - `SUPABASE_BUCKET` (default `media`), `SUPABASE_REGION` (default `ap-northeast-2`)
+   - `SECRET_KEY`, `DEBUG=False`
+3. Migratsiyani lokal kompyuterdan bir marta ishga tushiring (`DATABASE_URL` ni Direct/Session URL qilib):
+   `python manage.py migrate && python manage.py initadmin`
+4. `vercel --prod` yoki GitHub orqali deploy qiling.
+
+Eslatma: Vercel so'rov hajmi ~4.5 MB bilan cheklangan, shuning uchun katta PDF'ni admin orqali
+Vercel'da yuklab bo'lmaydi - PDF'ni Supabase Storage'ga to'g'ridan-to'g'ri yuklang yoki admin'ni Railway'da qoldiring.
